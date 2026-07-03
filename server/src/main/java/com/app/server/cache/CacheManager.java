@@ -12,7 +12,6 @@ public class CacheManager {
     private int cacheHits;
     private int cacheMisses;
     private int refreshCount;
-    private int derivedRates;
 
     public CacheManager(CacheConfig cacheConfig) {
         this.cacheConfig = cacheConfig;
@@ -126,11 +125,13 @@ public class CacheManager {
     }
 
     public int getDerivedRates() {
-        return derivedRates;
-    }
-
-    public void recordDerivedRate() {
-        derivedRates++;
+        int count = 0;
+        for (var entry : cache.getEntriesSnapshot()) {
+            if (entry.getValue().isDerived()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public boolean isStale(CacheEntry entry) {

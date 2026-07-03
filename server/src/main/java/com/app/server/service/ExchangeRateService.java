@@ -87,7 +87,6 @@ public class ExchangeRateService {
             throw new IllegalArgumentException("Exchange rate not found for " + normalizedFrom + " to " + normalizedTo);
         }
 
-        cacheManager.recordDerivedRate();
         String[] dependencies = new String[]{baseCurrency + "-" + normalizedFrom, baseCurrency + "-" + normalizedTo};
         cacheManager.cacheDerivedRate(normalizedFrom, normalizedTo, derivedEntry.getRate(), dependencies);
         
