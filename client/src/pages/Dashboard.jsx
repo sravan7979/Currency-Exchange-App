@@ -5,6 +5,7 @@ import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
+import LastLookupCard from '../components/common/LastLookupCard';
 import { addExchangeRate, resolveExchangeRate, getCacheStatistics } from '../services/api';
 
 const Dashboard = () => {
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [lookupTargetCurrency, setLookupTargetCurrency] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [lookupResult, setLookupResult] = useState(null);
+  const [lookupId, setLookupId] = useState(0);
 
   const fetchStats = async () => {
     try {
@@ -57,16 +59,20 @@ const Dashboard = () => {
   const handleLookupRate = async (e) => {
     e.preventDefault();
     if (!sourceCurrency || !lookupTargetCurrency) return;
+    if (sourceCurrency.length !== 3 || lookupTargetCurrency.length !== 3) {
+      toast.error('Currency codes must be exactly 3 letters');
+      return;
+    }
     
     setIsLookingUp(true);
     try {
       const response = await resolveExchangeRate(sourceCurrency.toUpperCase(), lookupTargetCurrency.toUpperCase());
       setLookupResult(response);
+      setLookupId(prev => prev + 1);
       toast.success('Rate resolved successfully');
       fetchStats();
     } catch (error) {
       toast.error(error.message || 'Failed to resolve exchange rate');
-      setLookupResult(null);
     } finally {
       setIsLookingUp(false);
     }
@@ -114,7 +120,7 @@ const Dashboard = () => {
                   label="Source Currency" 
                   placeholder="e.g. USD" 
                   value={sourceCurrency}
-                  onChange={(e) => setSourceCurrency(e.target.value)}
+                  onChange={(e) => setSourceCurrency(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())}
                   maxLength={3}
                 />
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 translate-y-1 text-tertiary">
@@ -124,7 +130,7 @@ const Dashboard = () => {
                   label="Target Currency" 
                   placeholder="e.g. EUR" 
                   value={lookupTargetCurrency}
-                  onChange={(e) => setLookupTargetCurrency(e.target.value)}
+                  onChange={(e) => setLookupTargetCurrency(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())}
                   maxLength={3}
                 />
               </div>
@@ -133,32 +139,14 @@ const Dashboard = () => {
               </Button>
             </form>
             
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <h4 className="text-xs font-semibold text-neutral uppercase tracking-wider mb-3">LAST LOOKUP RESULT</h4>
-              <div className="flex justify-between items-center bg-gray-50/50 p-4 rounded-md border border-gray-100">
-                <div className="flex flex-col">
-                  <span className="text-xs text-neutral mb-1">Currency Pair</span>
-                  <span className="font-semibold text-primary">
-                    {lookupResult ? `${lookupResult.sourceCurrency} / ${lookupResult.targetCurrency}` : '--'}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-xs text-neutral mb-1">Live Rate</span>
-                  <span className="font-semibold text-primary">
-                    {lookupResult ? lookupResult.exchangeRate.toFixed(6) : '--'}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-xs text-neutral mb-1">Method</span>
-                  <span className="font-semibold text-primary">
-                    {lookupResult ? lookupResult.method : '--'}
-                  </span>
-                </div>
-                <div className="bg-gray-200 p-2 rounded text-tertiary">
-                  <BarChart2 size={16} />
-                </div>
-              </div>
-            </div>
+            {lookupResult && (
+              <LastLookupCard 
+                key={lookupId}
+                currencyPair={`${lookupResult.baseCurrency} → ${lookupResult.targetCurrency}`}
+                exchangeRate={lookupResult.exchangeRate}
+                source={lookupResult.source}
+              />
+            )}
           </Card>
         </div>
 
