@@ -10,6 +10,10 @@ import lombok.Setter;
 @Setter
 public class UpdateExchangeRateRequest {
 
+    @NotBlank(message = "Base currency cannot be blank")
+    @Pattern(regexp = "^[A-Za-z]{3}$", message = "Currency code must contain exactly 3 alphabetic characters.")
+    private String baseCurrency;
+
     @NotBlank(message = "Target currency cannot be blank")
     @Pattern(regexp = "^[A-Za-z]{3}$", message = "Currency code must contain exactly 3 alphabetic characters.")
     private String targetCurrency;

@@ -25,7 +25,7 @@ public class ExchangeRateController {
 
     @PostMapping
     public ResponseEntity<ExchangeRateResponse> addExchangeRate(@Valid @RequestBody AddExchangeRateRequest request) {
-        ExchangeRateResponse response = exchangeRateService.addOrUpdateRate(request.getTargetCurrency(), request.getExchangeRate());
+        ExchangeRateResponse response = exchangeRateService.addOrUpdateRate(request.getBaseCurrency(), request.getTargetCurrency(), request.getExchangeRate());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -37,7 +37,7 @@ public class ExchangeRateController {
 
     @PutMapping
     public ResponseEntity<ExchangeRateResponse> updateExchangeRate(@Valid @RequestBody UpdateExchangeRateRequest request) {
-        ExchangeRateResponse response = exchangeRateService.addOrUpdateRate(request.getTargetCurrency(), request.getExchangeRate());
+        ExchangeRateResponse response = exchangeRateService.addOrUpdateRate(request.getBaseCurrency(), request.getTargetCurrency(), request.getExchangeRate());
         return ResponseEntity.ok(response);
     }
 

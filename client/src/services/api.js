@@ -42,10 +42,11 @@ export const getLatestHistory = (targetCurrency) =>
     body: JSON.stringify({ targetCurrency }),
   });
 
-export const addExchangeRate = (targetCurrency, exchangeRate) =>
+export const addExchangeRate = (baseCurrency, targetCurrency, exchangeRate) =>
   request('/exchange-rates', {
     method: 'POST',
     body: JSON.stringify({
+      baseCurrency,
       targetCurrency,
       exchangeRate,
     }),

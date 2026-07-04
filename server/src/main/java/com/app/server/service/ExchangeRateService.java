@@ -26,14 +26,24 @@ public class ExchangeRateService {
     }
 
     @Transactional
-    public ExchangeRateResponse addOrUpdateRate(String targetCurrency, double rate) {
-        String normalizedTarget = targetCurrency.toUpperCase();
-        String baseCurrency = cacheConfig.getBaseCurrency();
+    public ExchangeRateResponse addOrUpdateRate(String reqBase, String targetCurrency, double rate) {
+        String sysBase = cacheConfig.getBaseCurrency();
+        String target;
+        double finalRate;
         
-        historyService.addEntry(baseCurrency, normalizedTarget, rate);
-        cacheManager.addRate(baseCurrency, normalizedTarget, rate);
+        if (sysBase.equalsIgnoreCase(targetCurrency)) {
+            // e.g. User sent USD -> INR. System only stores INR -> X. We convert to INR -> USD.
+            target = reqBase.toUpperCase();
+            finalRate = 1.0 / rate;
+        } else {
+            target = targetCurrency.toUpperCase();
+            finalRate = rate;
+        }
         
-        return new ExchangeRateResponse(baseCurrency, normalizedTarget, rate, "DIRECT");
+        historyService.addEntry(sysBase, target, finalRate);
+        cacheManager.addRate(sysBase, target, finalRate);
+        
+        return new ExchangeRateResponse(sysBase, target, finalRate, "DIRECT");
     }
 
     public void invalidateRate(String targetCurrency) {

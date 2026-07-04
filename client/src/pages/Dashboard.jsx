@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [targetCurrency, setTargetCurrency] = useState('');
   const [rate, setRate] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [addMode, setAddMode] = useState('direct');
 
   // Get Rate Form State
   const [sourceCurrency, setSourceCurrency] = useState('');
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [lookupResult, setLookupResult] = useState(null);
   const [lookupId, setLookupId] = useState(0);
+  const [lookupSwap, setLookupSwap] = useState(false);
 
   const formatCurrency = (val) => val.trim().replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
 
@@ -43,11 +45,17 @@ const Dashboard = () => {
   const handleAddRate = async (e) => {
     e.preventDefault();
     if (!targetCurrency || !rate) return;
+    if (targetCurrency.length !== 3) {
+      toast.error('Currency code must be exactly 3 letters');
+      return;
+    }
     
     setIsAdding(true);
     try {
-      await addExchangeRate(targetCurrency.toUpperCase(), parseFloat(rate));
-      toast.success(`Successfully added rate for INR to ${targetCurrency.toUpperCase()}`);
+      const base = addMode === 'direct' ? 'INR' : targetCurrency;
+      const target = addMode === 'direct' ? targetCurrency : 'INR';
+      await addExchangeRate(base.toUpperCase(), target.toUpperCase(), parseFloat(rate));
+      toast.success(`Successfully added rate`);
       setTargetCurrency('');
       setRate('');
       fetchStats();
@@ -89,32 +97,6 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card title={<div className="flex items-center gap-2"><PlusCircle size={20} /> Add Exchange Rate</div>}>
-            <form onSubmit={handleAddRate} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Base Currency" value="INR" disabled className="bg-gray-100 opacity-75" />
-                <Input 
-                  label="Target Currency" 
-                  placeholder="e.g. USD" 
-                  value={targetCurrency}
-                  onChange={(e) => setTargetCurrency(formatCurrency(e.target.value))}
-                  maxLength={3}
-                />
-              </div>
-              <Input 
-                label="Exchange Rate (1 INR = ?)" 
-                placeholder="e.g. 0.0123" 
-                type="number"
-                step="0.000001"
-                value={rate}
-                onChange={(e) => setRate(e.target.value)}
-              />
-              <Button type="submit" className="w-full" disabled={isAdding}>
-                {isAdding ? 'ADDING...' : 'ADD RATE'}
-              </Button>
-            </form>
-          </Card>
-
           <Card title={<div className="flex items-center gap-2"><Search size={20} /> Get Exchange Rate</div>}>
             <form onSubmit={handleLookupRate} className="space-y-4">
               <div className="grid grid-cols-2 gap-4 items-end relative">
@@ -125,9 +107,22 @@ const Dashboard = () => {
                   onChange={(e) => setSourceCurrency(formatCurrency(e.target.value))}
                   maxLength={3}
                 />
-                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 translate-y-1 text-tertiary">
-                   ⇄ 
-                </div>
+                
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setLookupSwap(p => !p);
+                    const temp = sourceCurrency;
+                    setSourceCurrency(lookupTargetCurrency);
+                    setLookupTargetCurrency(temp);
+                  }}
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 translate-y-1 bg-white border border-gray-200 rounded-full p-1.5 hover:bg-gray-50 transition-all duration-300 z-10 cursor-pointer shadow-sm"
+                >
+                  <div className={`transition-transform duration-300 ${lookupSwap ? 'rotate-180' : ''}`}>
+                    ⇄
+                  </div>
+                </button>
+
                 <Input 
                   label="Target Currency" 
                   placeholder="e.g. EUR" 
@@ -136,8 +131,11 @@ const Dashboard = () => {
                   maxLength={3}
                 />
               </div>
-              <Button type="submit" variant="secondary" className="w-full bg-gray-100 hover:bg-gray-200 text-primary border border-gray-200" disabled={isLookingUp}>
-                {isLookingUp ? 'LOOKING UP...' : 'GET RATE'}
+              <p className="text-xs text-tertiary">
+                Enter any two supported currencies. The application automatically checks Cache, History, Inverse Rate, and finally derives a Cross Rate if required.
+              </p>
+              <Button type="submit" className="m-auto w-96 text-primary border border-gray-200" disabled={isLookingUp}>
+                {isLookingUp ? 'LOADING...' : 'GET RATE'}
               </Button>
             </form>
             
@@ -149,6 +147,56 @@ const Dashboard = () => {
                 source={lookupResult.source}
               />
             )}
+          </Card>
+
+          <Card title={<div className="flex items-center gap-2"><PlusCircle size={20} /> Add Exchange Rate</div>}>
+            <form onSubmit={handleAddRate} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 items-end relative">
+                <Input 
+                  label="Base Currency" 
+                  value={addMode === 'direct' ? 'INR' : targetCurrency} 
+                  disabled={addMode === 'direct'} 
+                  className={addMode === 'direct' ? 'bg-gray-100 opacity-75' : ''}
+                  onChange={addMode === 'inverse' ? (e) => setTargetCurrency(formatCurrency(e.target.value)) : undefined}
+                  maxLength={3}
+                  placeholder={addMode === 'inverse' ? 'e.g. USD' : ''}
+                />
+                
+                <button 
+                  type="button" 
+                  onClick={() => { setAddMode(p => p === 'direct' ? 'inverse' : 'direct'); setTargetCurrency(''); setRate(''); }}
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 translate-y-1 bg-white border border-gray-200 rounded-full p-1.5 hover:bg-gray-50 transition-all duration-300 z-10 cursor-pointer shadow-sm"
+                >
+                  <div className={`transition-transform duration-300 ${addMode === 'inverse' ? 'rotate-180' : ''}`}>
+                    ⇄
+                  </div>
+                </button>
+
+                <Input 
+                  label="Target Currency" 
+                  value={addMode === 'direct' ? targetCurrency : 'INR'} 
+                  disabled={addMode === 'inverse'}
+                  className={addMode === 'inverse' ? 'bg-gray-100 opacity-75' : ''}
+                  onChange={addMode === 'direct' ? (e) => setTargetCurrency(formatCurrency(e.target.value)) : undefined}
+                  maxLength={3}
+                  placeholder={addMode === 'direct' ? 'e.g. USD' : ''}
+                />
+              </div>
+              <p className="text-xs text-tertiary">
+                Exchange Rate Format: {addMode === 'direct' ? '1 INR = ? Target Currency' : '1 Base Currency = ? INR'}
+              </p>
+              <Input 
+                label={`Exchange Rate (1 ${addMode === 'direct' ? 'INR' : targetCurrency || 'Base'} = ? ${addMode === 'direct' ? targetCurrency || 'Target' : 'INR'})`}
+                placeholder="e.g. 0.0123" 
+                type="number"
+                step="0.000001"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+              />
+              <Button type="submit" className=" m-auto w-96 " disabled={isAdding}>
+                {isAdding ? 'ADDING...' : 'ADD RATE'}
+              </Button>
+            </form>
           </Card>
         </div>
 
@@ -194,13 +242,6 @@ const Dashboard = () => {
                 max={stats?.maximumCacheSize || 50} 
                 color="bg-tertiary"
               />
-              
-              {/* <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-md flex items-center gap-2 text-sm text-tertiary">
-                <svg className="w-4 h-4 text-neutral" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Next cleanup task scheduled in <span className="font-semibold text-primary">14m 22s</span>
-              </div> */}
             </div>
           </Card>
         </div>
