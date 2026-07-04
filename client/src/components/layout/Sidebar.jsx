@@ -24,15 +24,19 @@ const Sidebar = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm font-medium ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm font-medium ${
                     isActive 
-                      ? 'bg-gray-100 text-primary' 
+                      ? 'bg-gray-100 text-primary shadow-sm translate-x-1' 
                       : 'text-tertiary hover:text-primary hover:bg-gray-50'
                   }`
                 }
               >
-                <item.icon size={18} className="opacity-80" />
-                {item.label}
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={18} className={`transition-transform duration-200 ${isActive ? 'opacity-100 scale-110' : 'opacity-80'}`} />
+                    {item.label}
+                  </>
+                )}
               </NavLink>
             </li>
           ))}

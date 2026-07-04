@@ -97,12 +97,12 @@ public class ExchangeRateService {
             if (rateFrom != null && rateTo != null) {
                 double derivedRate = rateTo / rateFrom;
                 
-                // Add debugging logs as requested
-                System.out.println("Requested Pair: " + normalizedFrom + " -> " + normalizedTo);
-                System.out.println("INR -> " + normalizedFrom + " rate = " + String.format("%.6f", rateFrom));
-                System.out.println("INR -> " + normalizedTo + " rate = " + String.format("%.6f", rateTo));
-                System.out.println("Formula used: " + String.format("%.6f", rateTo) + " / " + String.format("%.6f", rateFrom));
-                System.out.println("Final Result: " + String.format("%.9f", derivedRate));
+                // debugging logs
+                // System.out.println("Requested Pair: " + normalizedFrom + " -> " + normalizedTo);
+                // System.out.println("INR -> " + normalizedFrom + " rate = " + String.format("%.6f", rateFrom));
+                // System.out.println("INR -> " + normalizedTo + " rate = " + String.format("%.6f", rateTo));
+                // System.out.println("Formula used: " + String.format("%.6f", rateTo) + " / " + String.format("%.6f", rateFrom));
+                // System.out.println("Final Result: " + String.format("%.9f", derivedRate));
 
                 String[] dependencies = new String[]{baseCurrency + "-" + normalizedFrom, baseCurrency + "-" + normalizedTo};
                 cacheManager.cacheDerivedRate(normalizedFrom, normalizedTo, derivedRate, dependencies);

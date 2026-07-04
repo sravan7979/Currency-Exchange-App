@@ -11,14 +11,14 @@ const Header = () => {
       </div>
       
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-4 text-tertiary">
-          <button className="hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-tertiary">
+          <button className="p-2 rounded-md hover:bg-gray-100 hover:text-primary transition-all duration-200 hover:scale-105 cursor-pointer">
             <Printer size={18} />
           </button>
-          <button className="hover:text-primary transition-colors">
+          <button className="p-2 rounded-md hover:bg-gray-100 hover:text-primary transition-all duration-200 hover:scale-105 cursor-pointer">
             <RefreshCw size={18} />
           </button>
-          <button className="hover:text-primary transition-colors">
+          <button className="p-2 rounded-md hover:bg-gray-100 hover:text-primary transition-all duration-200 hover:scale-105 cursor-pointer">
             <Power size={18} />
           </button>
         </div>

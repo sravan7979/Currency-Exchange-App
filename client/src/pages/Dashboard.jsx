@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [lookupResult, setLookupResult] = useState(null);
   const [lookupId, setLookupId] = useState(0);
 
+  const formatCurrency = (val) => val.trim().replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
+
   const fetchStats = async () => {
     try {
       const response = await getCacheStatistics();
@@ -95,7 +97,7 @@ const Dashboard = () => {
                   label="Target Currency" 
                   placeholder="e.g. USD" 
                   value={targetCurrency}
-                  onChange={(e) => setTargetCurrency(e.target.value)}
+                  onChange={(e) => setTargetCurrency(formatCurrency(e.target.value))}
                   maxLength={3}
                 />
               </div>
@@ -120,7 +122,7 @@ const Dashboard = () => {
                   label="Source Currency" 
                   placeholder="e.g. USD" 
                   value={sourceCurrency}
-                  onChange={(e) => setSourceCurrency(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())}
+                  onChange={(e) => setSourceCurrency(formatCurrency(e.target.value))}
                   maxLength={3}
                 />
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 translate-y-1 text-tertiary">
@@ -130,7 +132,7 @@ const Dashboard = () => {
                   label="Target Currency" 
                   placeholder="e.g. EUR" 
                   value={lookupTargetCurrency}
-                  onChange={(e) => setLookupTargetCurrency(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())}
+                  onChange={(e) => setLookupTargetCurrency(formatCurrency(e.target.value))}
                   maxLength={3}
                 />
               </div>
